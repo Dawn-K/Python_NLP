@@ -1,0 +1,3 @@
+*.tmp
+*.zh2en-Registry
+__pycache__/
