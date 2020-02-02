@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Python_NLP
 
 ![](https://img.shields.io/badge/license-MIT-blue)
@@ -45,6 +44,3 @@ main.py默认读取同目录下的wmt2018文件(在文件中可修改),会自动
 
 Lable.py会读取data/cn,data/en,data/final.align文件,然后生成out_test.cn, out_test.en,即最后的语料
 
-=======
-# Python_NLP
->>>>>>> 459c69fd7c1ba5e85572e6b76432dec71fade786
