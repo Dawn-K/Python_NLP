@@ -1,3 +1,5 @@
 *.tmp
 wmt2018.zh2en-Registry
 __pycache__/
+data/
+build/
