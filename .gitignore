@@ -1,5 +1,5 @@
 *.tmp
-wmt2018.zh2en-Registry
-__pycache__/
-data/
+creat_data/wmt2018.zh2en-Registry
+creat_data/__pycache__/
+creat_data/data/
 build/
