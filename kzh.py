@@ -1,5 +1,9 @@
+
+
 import re, sys, os
 import pynlpir
+
+def 
 if __name__ == '__main__':
     # print(sys.argv)
     pynlpir.open()
