@@ -1,3 +1,6 @@
+r""" 统计 htmlsrc/* 的标签的分布情况
+"""
+
 import re, os
 dict = {}
 care = []
@@ -12,7 +15,6 @@ comment_com = re.compile(comment)
 company_tags = []
 comment_sign = '!--...--'
 only_company = False
-print('yx')
 
 def updateDict(arr: list):
     for w in arr:
@@ -83,9 +85,7 @@ def print_diff():
 if __name__ == '__main__':
     dict[comment_sign] = 0
     for files in os.listdir('./htmlsrc'):
-        # print('begin '+files)
         process_file('./htmlsrc/' + files)
-        # print('finish '+files)
     only_company = True
     if only_company:
         read_company_tags()
