@@ -112,7 +112,7 @@ class ControlCore:
                 return True
         return False
 
-    def test(self):
+    def insert_lable(self):
         for word_cn, word_en, align in zip(self.SP.genSenCn(),
                                            self.SP.genSenEn(),
                                            self.SP.genAlign()):
@@ -162,10 +162,16 @@ class ControlCore:
             out_test_en.write(word_en.getTokenStr() + '\n')
 
 
-if __name__ == '__main__':
+def CreatLableData():
+    r""" 主函数,用以产生带标签语料
+    """
     out_test_cn = open('data/out_test.cn', 'w', encoding='utf-8')
     out_test_en = open('data/out_test.en', 'w', encoding='utf-8')
     CTR = ControlCore()
-    CTR.test()
+    CTR.insert_lable()
     out_test_cn.close()
     out_test_en.close()
+
+
+if __name__ == '__main__':
+    CreatLableData()
