@@ -165,6 +165,8 @@ class ControlCore:
 def CreatLableData():
     r""" 主函数,用以产生带标签语料
     """
+    global out_test_cn
+    global out_test_en
     out_test_cn = open('data/out_test.cn', 'w', encoding='utf-8')
     out_test_en = open('data/out_test.en', 'w', encoding='utf-8')
     CTR = ControlCore()
