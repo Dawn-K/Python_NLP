@@ -1,5 +1,7 @@
 *.tmp
+*.pyc
+*.en
+*.cn
 creat_data/wmt2018.zh2en-Registry
-creat_data/__pycache__/
 creat_data/data/
 build/
