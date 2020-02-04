@@ -1,3 +1,5 @@
+r"""集成了 准确率 召回率 F1值的计算 """
+
 import re
 
 
@@ -7,9 +9,11 @@ def normal(cn_file: str, en_file: str):
     tag_com = re.compile(r'<([\s\S]+?)>')
     with open(cn_file, 'r', encoding='utf-8') as f1:
         with open(en_file, 'r', encoding='utf-8') as f2:
+            tot_lines = 0
+            tot_p = 0
+            tot_r = 0
+            tot_f1 = 0
             for lc, le in zip(f1.readlines(), f2.readlines()):
-                print('lc ', lc)
-                print('le ', le)
                 lc = lc.rstrip('\n ')
                 le = le.rstrip('\n ')
                 dict_cn = {}
@@ -17,8 +21,7 @@ def normal(cn_file: str, en_file: str):
                 arr_c = tag_com.findall(lc)
                 arr_e = tag_com.findall(le)
 
-                print(arr_c)
-                print(arr_e)
+                # 插入字典 方便后续查询
                 for elem in arr_c:
                     if elem not in dict_cn.keys():
                         dict_cn[elem] = 0
@@ -29,17 +32,22 @@ def normal(cn_file: str, en_file: str):
                     dict_en[elem] = dict_en[elem] + 1
 
                 # 总标签数量上的保留比率
-                A = 0
+                Hits_num = 0
                 sum_elem_cn = dict_cn.__len__()  # 测试样例总数
                 sum_elem_en = dict_en.__len__()  # 召回率(测试覆盖面积)
 
                 for elem in dict_cn.keys():
                     if elem in dict_en.keys():
-                        A = A + dict_en[elem]
+                        Hits_num = Hits_num + dict_en[elem]
 
-                precision = A / sum_elem_cn
-                recall = A / sum_elem_en
+                precision = Hits_num / sum_elem_cn
+                recall = Hits_num / sum_elem_en
                 f1 = 2 * precision * recall / (precision + recall)
-                print('P: ', precision)
-                print('R: ', recall)
-                print('F1: %.3f' % (f1 * 100))
+
+                tot_p = tot_p + precision
+                tot_r = tot_r + recall
+                tot_f1 = tot_f1 + f1
+                tot_lines = tot_lines + 1
+            print('avg P: ', tot_p / tot_lines)
+            print('avg R: ', tot_r / tot_lines)
+            print('avg F1: %.3f' % (tot_f1 / tot_lines * 100))
