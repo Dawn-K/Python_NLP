@@ -122,6 +122,8 @@ class ControlCore:
             up = word_cn.len // 10 + 2
             insert_num = random.randint(1, up)
 
+            # 为防止出现L2标签未插入的情况
+            no_L2 = True
             for loop in range(insert_num):
                 # p1 p2 都是闭区间
                 p1 = 0
@@ -145,15 +147,18 @@ class ControlCore:
                         minn = min(minn, elem)
                         maxx = max(maxx, elem)
                 if minn > maxx:
+                    insert_num = insert_num + 1 
                     continue
 
+
                 # 添加标签
+                no_L2 = False
                 new_lable = self.LP2.getLable()
                 word_cn.add(p1, p2, new_lable)
                 word_en.add(minn, maxx, new_lable)
 
             L1_probability = random.randint(0, 1)
-            if L1_probability == 1:
+            if L1_probability == 1 or no_L2:
                 tmp_lable = self.LP1.getLable()
                 word_cn.add(0, word_cn.len - 1, tmp_lable)
                 word_en.add(0, word_en.len - 1, tmp_lable)
