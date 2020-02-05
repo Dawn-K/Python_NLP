@@ -1,8 +1,6 @@
-*.tmp
 *.pyc
-*.en
-*.cn
-*token
 creat_data/wmt2018.zh2en-Registry
 creat_data/data/
 build/
+evaluate_model/data/
+out_test.*
