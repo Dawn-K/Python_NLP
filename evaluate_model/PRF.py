@@ -45,6 +45,6 @@ def calculate_F1(cn_file: str, en_file: str):
             recall = Hits_num / sum_elem_en
             f1 = 2 * precision * recall / (precision + recall)
 
-            print('avg P: ', precision)
-            print('avg R: ', recall)
-            print('avg F1: %.3f' % (f1))
+            print('precision : ', precision)
+            print('recall : ', recall)
+            print('F1 value :  %.3f' % (f1))
