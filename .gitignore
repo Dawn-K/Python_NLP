@@ -4,3 +4,4 @@ creat_data/data/
 build/
 evaluate_model/data/
 out_test.*
+out_ref_test.en
