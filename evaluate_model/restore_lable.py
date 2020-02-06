@@ -1,7 +1,12 @@
+r""" 将被修改的标签(如'&lt;  u  &gt;') 恢复原状
+"""
 import re
 
 
 def trans(file_name: str, converted_file_name: str):
+    r"""file_name           : 待转换文件路径 
+        converted_file_name : 转换后文件存储路径
+    """
     left_tag_com = re.compile(r'&lt;')
     right_tag_com = re.compile(r'&gt;')
     tag_com = re.compile(r'<[\s\S]*?(\s)[\s\S]*?>')
@@ -21,7 +26,3 @@ def trans(file_name: str, converted_file_name: str):
                     if not flag or normal_line[i] != ' ':
                         final_arr.append(normal_line[i])
                 f_convered.write(''.join(final_arr))
-
-
-if __name__ == '__main__':
-    trans('data/en_true_token', 'data/tmp_file')
