@@ -11,7 +11,7 @@ import pynlpir, os
 
 def process_cn(file_name: str, store_file: str):
     pynlpir.open()
-    tmp_file_c = open('data/cn_true_token', 'w', encoding='utf-8')  # creat cn_token
+    tmp_file_c = open(store_file, 'w', encoding='utf-8')  # creat cn_token
     with open(file_name, 'r', encoding='utf-8') as file:  #  read cn
         for word in file:
             final_str = ' '.join(pynlpir.segment(word, pos_tagging=False))
