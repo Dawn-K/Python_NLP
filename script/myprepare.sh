@@ -7,6 +7,36 @@
 # Test set         用来评估所选出来的model的实际性能
 
 
+function parm_err(){
+	echo "Please input -l and -m parms\n such as ./myprepare.sh -l no -m 0 "
+	echo "-l <protection>     <protection> can be 'no' 'tok' 'bpe' "
+	echo "-m <model>          <model> can be 0 or 1 or 2  "
+	exit
+}
+
+LABLE=""
+MODEL=""
+while getopts 'l:m:' opt
+do
+	case $opt in
+		l)
+			LABLE=$OPTARG;;
+		m)
+			MODEL=$OPTARG;;
+		*)
+			parm_err
+	esac
+done
+echo $LABLE $MODEL
+
+if  [ "$LABLE" != "no" ] && [ "$LABLE" != "tok" ] && [ "$LABLE" != "bpe" ]; then
+	parm_err
+fi
+
+if  [ "$MODEL" != "0" ] && [ "$MODEL" != "1" ] && [ "$MODEL" != "2" ]; then  
+	parm_err
+fi
+
 # script path
 SCRIPTS=moses/mosesdecoder/scripts
 TOKENIZER=$SCRIPTS/tokenizer/tokenizer.perl
@@ -51,7 +81,14 @@ for l in $src $tgt; do
 	  echo "en tokenizer finished"
     fi
 done
+
+# CLEAN 会导致此处不好对应
 perl $CLEAN -ratio 1.5 $tmp/train.tok $src $tgt $tmp/train.clean 1 175
+
+# 跳过CLEAN
+# cp $tmp/train.tok.$src $tmp/train.clean.$src
+# cp $tmp/train.tok.$tgt $tmp/train.clean.$tgt
+
 for l in $src $tgt; do
     perl $LC < $tmp/train.clean.$l > $tmp/train.tags.$l
 done
@@ -85,3 +122,12 @@ for L in $src $tgt; do
         python $BPEROOT/apply_bpe.py -c $BPE_CODE < $tmp/$f > $prep/$f
     done
 done
+
+TEXT=$prep
+DATADIR=preprocess_data
+rm -rf $DATADIR
+mkdir -p $DATADIR
+fairseq-preprocess --source-lang $src --target-lang $tgt \
+    --trainpref $TEXT/train --validpref $TEXT/valid --testpref $TEXT/test \
+    --destdir $DATADIR \
+    --workers 20
