@@ -141,6 +141,7 @@ class ControlCore:
 
     def insert_lable(self, record_num: int):
         line_cnt = 0
+        L3_LABLE = Lable('br', fix=True, start_name='<br/>', end_name='')
         for word_cn, word_en, align in zip(self.SP.genSenCn(),
                                            self.SP.genSenEn(),
                                            self.SP.genAlign()):
@@ -153,12 +154,24 @@ class ControlCore:
             # todo: 控制标签密度
             up = word_cn.len // 10 + 2
             insert_num = random.randint(1, up)
-
             # 为防止出现L2标签未插入的情况
             no_l2 = True
             lable_dict = {}
             lable_dict['lable'] = []
             ins_record = []
+
+            # 生成L3标签
+            # todo: L3生成的概率
+            l3_probability = random.randint(0, 49)
+            while l3_probability == 1:
+                l3_cn_pos = random.randint(0, word_cn.len - 1)
+                if l3_cn_pos in align.keys():
+                    l3_en_pos = align[l3_cn_pos][0]
+                    ins_record.append(
+                        Insert_Record(l3_cn_pos, l3_cn_pos, l3_en_pos,
+                                      l3_en_pos, L3_LABLE))
+                    break
+
             for loop in range(insert_num):
                 # 生成 中文插入的范围 p1 p2 都是闭区间
                 p1 = 0
@@ -208,16 +221,30 @@ class ControlCore:
                 # 生成泛化标签
                 gen_lable = None
                 if lable_idx <= record_num:
-                    gen_lable = Lable(elem.lable.name,
-                                      fix=True,
-                                      start_name='$lable_l' + str(lable_idx),
-                                      end_name='$lable_r' + str(lable_idx))
+                    if elem.lable.name != 'br':
+                        gen_lable = Lable(elem.lable.name,
+                                          fix=True,
+                                          start_name='$lable_l' +
+                                          str(lable_idx),
+                                          end_name='$lable_r' + str(lable_idx))
+                    else:
+                        gen_lable = Lable(elem.lable.name,
+                                          fix=True,
+                                          start_name='$lable_' +
+                                          str(lable_idx),
+                                          end_name='')
                     lable_dict[lable_idx] = gen_lable.name
                 else:
-                    gen_lable = Lable(elem.lable.name,
-                                      fix=True,
-                                      start_name='$lable',
-                                      end_name='$lable')
+                    if elem.lable.name != 'br':
+                        gen_lable = Lable(elem.lable.name,
+                                          fix=True,
+                                          start_name='$lable',
+                                          end_name='$lable')
+                    else:
+                        gen_lable = Lable(elem.lable.name,
+                                          fix=True,
+                                          start_name='$lable',
+                                          end_name='')
                     lable_dict['lable'].append(gen_lable.name)
                 lable_idx = lable_idx - 1
                 word_gen_cn.add(elem.cn_l_pos, elem.cn_r_pos, gen_lable)

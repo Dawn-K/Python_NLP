@@ -14,58 +14,37 @@ def add_copy(line: str):
     return newline
 
 
-def generalized(line: str):
-    stk = []
-    idx = 0
-    in_lable = False
-    len = line.__len__()
-    newline = ''
-    lable_buff = ''
-    for i in range(len):
-        if line[i] == '<':
-            in_lable = True
-        elif line[i] == '>':
-            now_idx = ''
-            if lable_buff[0] == '/':  # start lable
-                lable_buff = lable_buff[1:]
-                now_idx = '_r' + str(stk.pop()[1]) + ' '
-            else:  # end lable
-                idx = idx + 1
-                now_idx = '_l' + str(idx) + ' '
-                stk.append((lable_buff, idx))
-            newline = newline + '$lable' + str(now_idx) + ' '
-            lable_buff = ''
-            in_lable = False
-        else:
-            if in_lable:
-                if line[i] == ' ':
-                    continue
-                else:
-                    lable_buff = lable_buff + line[i]
-            else:
-                newline = newline + line[i]
-    return newline
+def generalized(language: str):
+    with open('../creat_data/data/out_generalization.' + language,
+              'r',
+              encoding='utf-8') as f:
+        for l in f.readlines():
+            print(l)
 
 
-def pro_line(line: str, model: int):
+def pro_line(line: str, model: int, language: str):
     if model == 0:
         return line
     elif model == 1:
         return add_copy(line)
-    elif model == 2:
-        return generalized(line)
 
 
-def lable_process(model: int, file_name: str):
+def lable_process(model: int, file_name: str, language: str):
     assert (model in [0, 1, 2])
-    with open(file_name, 'r', encoding='utf-8') as f:
-        for l in f.readlines():
-            print(pro_line(l, model))
+    if model != 2:
+        with open(file_name, 'r', encoding='utf-8') as f:
+            for l in f.readlines():
+                print(pro_line(l, model, language))
+    else:
+        generalized(language)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         exit(
-            'ERROR! lable_process needs 2 parms\n such as "python lable_process.py model file  " '
+            'ERROR! lable_process needs 3 parms\n such as "python lable_process.py model file language " '
         )
-    lable_process(int(sys.argv[1]), sys.argv[2])
+    model = int(sys.argv[1])
+    file_name = sys.argv[2]
+    language = sys.argv[3]
+    lable_process(model, file_name, language)
