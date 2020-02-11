@@ -119,7 +119,7 @@ class Insert_Record:
         if self.cn_l_pos != other.cn_l_pos:
             return self.cn_l_pos < other.cn_l_pos
         else:
-            return self.cn_r_pos > other.cn_r_pos 
+            return self.cn_r_pos > other.cn_r_pos
 
 
 # 控制核心
@@ -191,7 +191,6 @@ class ControlCore:
                 ins_record.append(
                     Insert_Record(p1, p2, minn, maxx, self.LP2.getLable()))
             l1_probability = random.randint(0, 1)
-            tmp_lable = Lable('')
             if l1_probability == 1 or no_l2:
                 self.record.append((0, word_cn.len - 1))
                 ins_record.append(
@@ -213,9 +212,9 @@ class ControlCore:
                                       fix=True,
                                       start_name='$lable_l' + str(lable_idx),
                                       end_name='$lable_r' + str(lable_idx))
-                    lable_dict[lable_idx] = tmp_lable.name
+                    lable_dict[lable_idx] = gen_lable.name
                 else:
-                    gen_lable = Lable(tmp_lable.name,
+                    gen_lable = Lable(elem.lable.name,
                                       fix=True,
                                       start_name='$lable',
                                       end_name='$lable')
@@ -229,7 +228,7 @@ class ControlCore:
             out_generalization_en.write(word_gen_en.getTokenStr() + '\n')
 
 
-def CreatLableData():
+def CreatLableData(record_num: int):
     r""" 主函数,用以产生带标签语料
 """
     global out_test_cn
@@ -252,4 +251,4 @@ def CreatLableData():
 
 
 if __name__ == '__main__':
-    CreatLableData()
+    CreatLableData(6)
