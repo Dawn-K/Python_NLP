@@ -62,3 +62,9 @@ cd script
 chmod +x *.sh
 ./mycreatdata.sh -f $WMTPATH -l $READLINE -k $RECORDNUM
 ./myprepare.sh -l $PROTECT_MODEL -m $GENERALIATE_MODEL -e $MOSESPATH -s $SUBWORDPATH
+
+# 还需测试,
+# 模型最后存放为checkpoints/fconv_wmt_cn_en/checkpoint_best.pt
+# ./mytrain.sh
+# ./mygenerate.sh
+# ./myinteractive.sh
