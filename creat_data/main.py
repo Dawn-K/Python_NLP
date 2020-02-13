@@ -18,6 +18,6 @@ if __name__ == '__main__':
             'Expect three parameters\n such as:   python main.py  CN2EN_SOURCE_FILE READ_FILE_NUM RECORD_NUM'
         )
     CN2EN_SOURCE_FILE = sys.argv[1]
-    READ_FILE_NUM = sys.argv[2]
-    RECORD_NUM = sys.argv[3]
+    READ_FILE_NUM = int(sys.argv[2])
+    RECORD_NUM = int(sys.argv[3])
     MainCreat(CN2EN_SOURCE_FILE, READ_FILE_NUM, RECORD_NUM)

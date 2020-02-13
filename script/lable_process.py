@@ -15,6 +15,7 @@ def add_copy(line: str):
 
 
 def generalized(language: str):
+    #todo: path
     with open('../creat_data/data/out_generalization.' + language,
               'r',
               encoding='utf-8') as f:
@@ -23,18 +24,20 @@ def generalized(language: str):
 
 
 def pro_line(line: str, model: int, language: str):
-    if model == 0:
+    if model == '0':
         return line
-    elif model == 1:
+    elif model == '1':
         return add_copy(line)
+    else:
+        print("pro_line err!!!")
 
 
-def lable_process(model: int, file_name: str, language: str):
-    assert (model in [0, 1, 2])
-    if model != 2:
+def lable_process(model: str, file_name: str, language: str):
+    assert (model in ['0', '1', '2'])
+    if model != '2':
         with open(file_name, 'r', encoding='utf-8') as f:
             for l in f.readlines():
-                print(pro_line(l, model, language))
+                print(pro_line(l, model, language),end='')
     else:
         generalized(language)
 
@@ -44,7 +47,7 @@ if __name__ == '__main__':
         exit(
             'ERROR! lable_process needs 3 parms\n such as "python lable_process.py model file language " '
         )
-    model = int(sys.argv[1])
+    model = sys.argv[1]
     file_name = sys.argv[2]
     language = sys.argv[3]
     lable_process(model, file_name, language)
