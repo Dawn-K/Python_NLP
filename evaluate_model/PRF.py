@@ -32,15 +32,17 @@ def calculate_F1(cn_file: str, en_file: str):
             sum_elem_cn = 0  # 测试样例总数
             sum_elem_en = 0  # 召回率(测试覆盖面积)
             for elem in dict_cn.keys():
-                sum_elem_cn = sum_elem_cn + dict_cn[elem] 
+                sum_elem_cn = sum_elem_cn + dict_cn[elem]
 
             for elem in dict_en.keys():
                 sum_elem_en = sum_elem_en + dict_en[elem]
 
             for elem in dict_cn.keys():
                 if elem in dict_en.keys():
-                    Hits_num = Hits_num + min(dict_en[elem],dict_cn[elem])
-
+                    Hits_num = Hits_num + min(dict_en[elem], dict_cn[elem])
+            if sum_elem_cn == 0 or sum_elem_en == 0 or Hits_num == 0:
+                print('There are no lable!')
+                return
             precision = Hits_num / sum_elem_cn
             recall = Hits_num / sum_elem_en
             f1 = 2 * precision * recall / (precision + recall)

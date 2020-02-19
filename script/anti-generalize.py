@@ -1,11 +1,11 @@
 r""" 利用json信息将标签反向复原
 """
 
-import json, sys
+import json, sys, re
 record_file = None
 
 
-def process(line: str, info: str):
+def process_model2(line: str, info: str):
     dict = json.loads(info)
     arr = line.split(' ')
     lenth = len(arr)
@@ -19,18 +19,32 @@ def process(line: str, info: str):
     return ' '.join(arr)
 
 
-def anti_generalize(input_file: str, json_file: str):
-    with open(input_file, 'r', encoding='utf-8') as i:
-        with open(json_file, 'r', encoding='utf-8') as j:
-            for raw, js in zip(i.readlines(), j.readlines()):
-                print(process(raw.rstrip('\n'), js))
+def anti_generalize(input_file: str, json_file: str, model: str):
+    if model == "2":
+        with open(input_file, 'r', encoding='utf-8') as i:
+            with open(json_file, 'r', encoding='utf-8') as j:
+                for raw, js in zip(i.readlines(), j.readlines()):
+                    print(process_model2(raw.rstrip('\n'), js))
+    elif model == "1":
+        l_copy_tag = re.compile(r'\$copy<')
+        r_copy_tag = re.compile(r'>\$copy')
+        with open(input_file, 'r', encoding='utf-8') as i:
+            for l in i.readlines():
+                newlline = l_copy_tag.sub(r'<', l.rstrip('\n'))
+                newlline = r_copy_tag.sub(r'>', newlline)
+                print(newlline)
+    else:
+        with open(input_file, 'r', encoding='utf-8') as i:
+            for l in i.readlines():
+                print(l.rstrip('\n'))
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         exit(
-            'ERROR! anti-generalize_file needs 2 parms\n such as "python anti-generalize_file.py input_file json_file " '
+            'ERROR! anti-generalize_file needs 3 parms\n such as "python anti-generalize_file.py input_file json_file model " '
         )
     input_file = sys.argv[1]
     json_file = sys.argv[2]
-    anti_generalize(input_file, json_file)
+    model = sys.argv[3]
+    anti_generalize(input_file, json_file, model)

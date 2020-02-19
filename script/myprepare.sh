@@ -8,9 +8,10 @@
 
 
 function parm_err(){
-	echo "Please input -l -m -moses -subword parms\n such as ./myprepare.sh -l no -m 0 -e ~/moses/mosesdecoder/scripts -s ~/subword-nmt/subword_nmt"
+	echo "Please input -l -m -k -moses -subword parms\n such as ./myprepare.sh -l no -m 0 -k 6 -e ~/moses/mosesdecoder/scripts -s ~/subword-nmt/subword_nmt"
 	echo "-l <protection>     <protection> can be 'no' 'tok' 'bpe' "
 	echo "-m <model>          <model> can be 0 or 1 or 2  "
+    echo "-k <record_num>     <record_num> is the num of lable to record"
     echo "-e <path>           <path> is the path of moses scripts  "
     echo "-s <path>           <path> is the path of subword      "
 	exit
@@ -23,14 +24,17 @@ MODEL=""
 MOSESROOT=""
 # ~/subword-nmt/subword_nmt
 BPEROOT=""
+RECORD_NUM=""
 BPE_TOKENS=10000
-while getopts 'l:m:e:s:' opt
+while getopts 'l:m:k:e:s:' opt
 do
 	case $opt in
 		l)
 			LABLE=$OPTARG;;
 		m)
 			MODEL=$OPTARG;;
+        k)
+            RECORD_NUM=$OPTARG;;
         e)
             MOSESROOT=$OPTARG;;
         s)
@@ -69,13 +73,23 @@ orig=../orig
 CREATDATA=../creat_data/data
 rawprefix=out_test
 testprefix=out_test
+cslxprefix=test_splitce
 mkdir -p $orig $tmp $prep
 
 # 最开始假设所需的资料都和脚本同目录,并且名字为$rawprefix.* $testprefix.*
 for l in $src $tgt; do
-    python lable_process.py $MODEL $CREATDATA/$rawprefix.$l  $l > $orig/$rawprefix.$l
-    python lable_process.py $MODEL $CREATDATA/$testprefix.$l $l > $orig/$testprefix.$l
+    python3 lable_process.py $MODEL $CREATDATA/$rawprefix.$l  $l > $orig/$rawprefix.$l
+    python3 lable_process.py $MODEL $CREATDATA/$testprefix.$l $l > $orig/$testprefix.$l
 done
+
+python3 restore_token.py $LABLE $MODEL $CREATDATA/$cslxprefix.$src > $CREATDATA/$cslxprefix.restore.$src
+
+if [ "$MODEL" != "2" ];
+then
+    python3 lable_process.py $MODEL $CREATDATA/$cslxprefix.restore.$src > $orig/$cslxprefix.$src
+else
+    python3 generalize_file.py $CREATDATA/$cslxprefix.restore.$src  $RECORD_NUM > $orig/$cslxprefix.$src
+fi
 
 # 进行分词和清理
 echo "pre-processing train data..."
@@ -83,7 +97,7 @@ for l in $src $tgt; do
     tok=train.tok.$l
     if [ "$l" == "$src" ];
     then 
-	  python $CN_TOKENIZER $orig/$rawprefix.$l | perl $TOKENIZER -l cn > $tmp/$tok
+	  python3 $CN_TOKENIZER $orig/$rawprefix.$l | perl $TOKENIZER -l cn > $tmp/$tok
 	  echo "cn tokenizer finished"
     else
       perl $TOKENIZER -l en < $orig/$rawprefix.$l  >  $tmp/$tok 
@@ -92,11 +106,11 @@ for l in $src $tgt; do
 done
 
 # CLEAN 会导致此处不好对应
-perl $CLEAN -ratio 1.5 $tmp/train.tok $src $tgt $tmp/train.clean 1 175
+# perl $CLEAN -ratio 1.5 $tmp/train.tok $src $tgt $tmp/train.clean 1 175
 
 # 跳过CLEAN
-# cp $tmp/train.tok.$src $tmp/train.clean.$src
-# cp $tmp/train.tok.$tgt $tmp/train.clean.$tgt
+cp $tmp/train.tok.$src $tmp/train.clean.$src
+cp $tmp/train.tok.$tgt $tmp/train.clean.$tgt
 
 for l in $src $tgt; do
     perl $LC < $tmp/train.clean.$l > $tmp/train.tags.$l
@@ -105,7 +119,7 @@ echo "finished tokenize , clean , lowercase"
 
 echo "creating train, valid, test..."
 perl $TOKENIZER -l en < $orig/$testprefix.en | perl $LC > $tmp/test.en
-python $CN_TOKENIZER $orig/$testprefix.cn  | perl $TOKENIZER -l cn | perl $LC > $tmp/test.cn 
+python3 $CN_TOKENIZER $orig/$testprefix.cn  | perl $TOKENIZER -l cn | perl $LC > $tmp/test.cn 
 
 # 在分词时不切分
 if [ "$LABLE" != "no" ]; then
@@ -115,8 +129,8 @@ if [ "$LABLE" != "no" ]; then
     done
 
     for l in $src $tgt; do
-        python restore_token.py $LABLE $MODEL $tmp/test.bak.$l > $tmp/test.$l
-        python restore_token.py $LABLE $MODEL $tmp/train.tags.bak.$l > $tmp/train.tags.$l
+        python3 restore_token.py $LABLE $MODEL $tmp/test.bak.$l > $tmp/test.$l
+        python3 restore_token.py $LABLE $MODEL $tmp/train.tags.bak.$l > $tmp/train.tags.$l
     done
 fi
 
@@ -135,13 +149,13 @@ for l in $src $tgt; do
 done
 
 echo "learn_bpe.py on ${TRAIN}..."
-python $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
+python3 $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
 
 # 将train.$L valid.$L test.$L 子词切分后移动到$prep/下
 for L in $src $tgt; do
     for f in train.$L valid.$L test.$L; do
         echo "apply_bpe.py to ${f}..."
-        python $BPEROOT/apply_bpe.py -c $BPE_CODE < $tmp/$f > $prep/$f
+        python3 $BPEROOT/apply_bpe.py -c $BPE_CODE < $tmp/$f > $prep/$f
     done
 done
 
@@ -154,7 +168,7 @@ if [ "$LABLE" == "bpe" ]; then # 仅BPE时保留
 
     for l in $src $tgt; do
         for f in train.$l valid.$l test.$l; do
-            python restore_token.py $LABLE $MODEL $prep/$f.bpebak > $prep/$f
+            python3 restore_token.py $LABLE $MODEL $prep/$f.bpebak > $prep/$f
         done
     done
 fi
@@ -164,6 +178,6 @@ DATADIR=../preprocess_data
 rm -rf $DATADIR
 mkdir -p $DATADIR
 fairseq-preprocess --source-lang $src --target-lang $tgt \
-    --trainpref $TEXT/train --validpref $TEXT/valid --testpref $TEXT/test \
+    --trainpref $TEXT/train --validpref $TEXT/valid  \
     --destdir $DATADIR \
     --workers 20
