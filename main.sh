@@ -5,7 +5,7 @@ WMTPATH=~/wmt2018.zh2en-Registry
 # CSLX文件的绝对路径
 CSLXPATH=~/cslx-dataset-zh2en
 # 读取wmt的前几行,为空则为全读,1w行大概需要两分钟
-READLINE=100
+READLINE=10000
 # 记录标签中的前几个
 RECORDNUM=6
 # mosesdecoder/script的绝对路径 例如 ~/moses/mosesdecoder/scripts
@@ -18,7 +18,7 @@ FASTPATH=~/fast_align/fast_align-master/build
 function main_err(){
 	echo "Please input -l and -m parms\n such as ./main.sh -l no -m 0 "
 	echo "-l <protection>     <protection> can be 'no' 'tok' 'bpe' "
-	echo "-m <model>          <model> can be 0 or 1 or 2  "
+	echo "-m <model>          <model> can be 0 or 1 or 2 or 3 "
 	exit
 }
 # 标签保护模式
@@ -67,5 +67,5 @@ chmod +x *.sh
 ./myprepare.sh -l $PROTECT_MODEL -m $GENERALIATE_MODEL -k $RECORDNUM -e $MOSESPATH -s $SUBWORDPATH
 
 # 模型最后存放为checkpoints/fconv_wmt_cn_en/checkpoint_best.pt
-./mytrain.sh
-./myinteractive.sh -l $PROTECT_MODEL -m $GENERALIATE_MODEL -r $RECORDNUM
+#./mytrain.sh
+#./myinteractive.sh -l $PROTECT_MODEL -m $GENERALIATE_MODEL -r $RECORDNUM

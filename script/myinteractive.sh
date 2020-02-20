@@ -38,6 +38,7 @@ done
 
 # 翻译
 DATADIR=../preprocess_data
+CUDA_VISIBLE_DEVICES=0
 fairseq-generate  $DATADIR \
     --path $MODEL_DIR/checkpoint_best.pt \
     --beam 5 --remove-bpe  | tee out.tmp
@@ -51,5 +52,6 @@ python3 anti-generalize.py gen.out.sys gen_record $GENERALIATE_MODEL > $ANTI_GEN
 
 # 评估模型
 cd ../evaluate_model
-python3 evaluate.py $REFIN ../script/$ANTI_GEN_OUTPUT $REFOUT
+echo "evaluate the model"
+#python3 evaluate.py $REFIN ../script/$ANTI_GEN_OUTPUT $REFOUT
 cd ../script  

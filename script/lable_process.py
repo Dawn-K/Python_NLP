@@ -14,11 +14,9 @@ def add_copy(line: str):
     return newline
 
 
-def generalized(language: str):
+def generalized(file_name: str, language: str):
     #todo: path
-    with open('../creat_data/data/out_generalization.' + language,
-              'r',
-              encoding='utf-8') as f:
+    with open(file_name + language, 'r', encoding='utf-8') as f:
         for l in f.readlines():
             print(l)
 
@@ -33,13 +31,19 @@ def pro_line(line: str, model: int, language: str):
 
 
 def lable_process(model: str, file_name: str, language: str):
-    assert (model in ['0', '1', '2'])
-    if model != '2':
+    assert (model in ['0', '1', '2', '3'])
+    gen_file = None
+    if model in ['0', '1']:
         with open(file_name, 'r', encoding='utf-8') as f:
             for l in f.readlines():
-                print(pro_line(l, model, language),end='')
+                print(pro_line(l, model, language), end='')
+        return
+    elif model == '2':
+        gen_file = r'../creat_data/data/out_generalization.'
     else:
-        generalized(language)
+        assert (model == '3')
+        gen_file = r'../creat_data/data/out_generalization3.'
+    generalized(gen_file, language)
 
 
 if __name__ == '__main__':

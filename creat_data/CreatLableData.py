@@ -6,6 +6,8 @@ out_test_cn = None
 out_test_en = None
 out_generalization_cn = None
 out_generalization_en = None
+out_generalization3_cn = None
+out_generalization3_en = None
 c_tag_pattern = r'[\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]'
 c_tag_com = re.compile(c_tag_pattern)
 
@@ -139,6 +141,37 @@ class ControlCore:
                 return True
         return False
 
+    def creat_gen2lable(self, elem: Insert_Record, bringIdx: bool,
+                        lable_idx: int) -> Lable:
+        if bringIdx:
+            if elem.lable.name != 'br':
+                return Lable(elem.lable.name, True,
+                             '$lable_l' + str(lable_idx),
+                             '$lable_r' + str(lable_idx))
+            else:
+                return Lable(elem.lable.name, True, '$lable_' + str(lable_idx),
+                             '')
+        else:
+            if elem.lable.name != 'br':
+                return Lable(elem.lable.name, True, '$lable', '$lable')
+            else:
+                return Lable(elem.lable.name, True, '$lable', '')
+
+    def creat_gen3lable(self, s1: Sentence, s2: Sentence, record_num: int):
+        idx = 1
+        trans_dict = {}
+        arr1 = list(filter(None, s1.getTokenStr().split(' ')))
+        arr2 = list(filter(None, s2.getTokenStr().split(' ')))
+        for i in range(len(arr1)):
+            if re.match(r'^\$lable_', arr1[i]) is not None:
+                trans_dict[arr1[i]] = r'$lable_' + str(idx)
+                arr1[i] = trans_dict[arr1[i]]
+                idx = idx + 1
+        for i in range(len(arr2)):
+            if re.match(r'^\$lable', arr2[i]) is not None:
+                arr2[i] = trans_dict[arr2[i]]
+        return (' '.join(arr1), ' '.join(arr2))
+
     def insert_lable(self, record_num: int):
         line_cnt = 0
         L3_LABLE = Lable('br', fix=True, start_name='<br/>', end_name='')
@@ -149,6 +182,8 @@ class ControlCore:
             # 此处要用深拷贝,否则会将标签插入同一Sentence中
             word_gen_cn = copy.deepcopy(word_cn)
             word_gen_en = copy.deepcopy(word_en)
+            full_lable_cn = copy.deepcopy(word_cn)
+            full_lable_en = copy.deepcopy(word_en)
             self.record = []
             line_cnt = line_cnt + 1
             # todo: 控制标签密度
@@ -156,8 +191,6 @@ class ControlCore:
             insert_num = random.randint(1, up)
             # 为防止出现L2标签未插入的情况
             no_l2 = True
-            lable_dict = {}
-            lable_dict['lable'] = []
             ins_record = []
 
             # 生成L3标签
@@ -219,40 +252,24 @@ class ControlCore:
                 word_cn.add(elem.cn_l_pos, elem.cn_r_pos, elem.lable)
                 word_en.add(elem.en_l_pos, elem.en_r_pos, elem.lable)
                 # 生成泛化标签
-                gen_lable = None
-                if lable_idx <= record_num:
-                    if elem.lable.name != 'br':
-                        gen_lable = Lable(elem.lable.name,
-                                          fix=True,
-                                          start_name='$lable_l' +
-                                          str(lable_idx),
-                                          end_name='$lable_r' + str(lable_idx))
-                    else:
-                        gen_lable = Lable(elem.lable.name,
-                                          fix=True,
-                                          start_name='$lable_' +
-                                          str(lable_idx),
-                                          end_name='')
-                    lable_dict[lable_idx] = gen_lable.name
-                else:
-                    if elem.lable.name != 'br':
-                        gen_lable = Lable(elem.lable.name,
-                                          fix=True,
-                                          start_name='$lable',
-                                          end_name='$lable')
-                    else:
-                        gen_lable = Lable(elem.lable.name,
-                                          fix=True,
-                                          start_name='$lable',
-                                          end_name='')
-                    lable_dict['lable'].append(gen_lable.name)
-                lable_idx = lable_idx - 1
+                gen_lable = self.creat_gen2lable(elem, lable_idx <= record_num,
+                                                 lable_idx)
                 word_gen_cn.add(elem.cn_l_pos, elem.cn_r_pos, gen_lable)
                 word_gen_en.add(elem.en_l_pos, elem.en_r_pos, gen_lable)
+
+                gen3_lable = self.creat_gen2lable(elem, True, lable_idx)
+                full_lable_cn.add(elem.cn_l_pos, elem.cn_r_pos, gen3_lable)
+                full_lable_en.add(elem.en_l_pos, elem.en_r_pos, gen3_lable)
+                lable_idx = lable_idx - 1
+
+            res_pair = self.creat_gen3lable(full_lable_cn, full_lable_en,
+                                            record_num)
             out_test_cn.write(word_cn.getTokenStr() + '\n')
             out_test_en.write(word_en.getTokenStr() + '\n')
             out_generalization_cn.write(word_gen_cn.getTokenStr() + '\n')
             out_generalization_en.write(word_gen_en.getTokenStr() + '\n')
+            out_generalization3_cn.write(res_pair[0] + '\n')
+            out_generalization3_en.write(res_pair[1] + '\n')
 
 
 def CreatLableData(record_num: int):
@@ -261,6 +278,7 @@ def CreatLableData(record_num: int):
     global out_test_cn
     global out_test_en
     global out_generalization_cn, out_generalization_en
+    global out_generalization3_cn, out_generalization3_en
     out_test_cn = open('data/out_test.cn', 'w', encoding='utf-8')
     out_test_en = open('data/out_test.en', 'w', encoding='utf-8')
     out_generalization_cn = open('data/out_generalization.cn',
@@ -269,12 +287,20 @@ def CreatLableData(record_num: int):
     out_generalization_en = open('data/out_generalization.en',
                                  'w',
                                  encoding='utf-8')
+    out_generalization3_cn = open('data/out_generalization3.cn',
+                                  'w',
+                                  encoding='utf-8')
+    out_generalization3_en = open('data/out_generalization3.en',
+                                  'w',
+                                  encoding='utf-8')
     ctr = ControlCore()
-    ctr.insert_lable(6)
+    ctr.insert_lable(record_num)
     out_test_cn.close()
     out_test_en.close()
     out_generalization_cn.close()
     out_generalization_en.close()
+    out_generalization3_cn.close()
+    out_generalization3_en.close()
 
 
 if __name__ == '__main__':

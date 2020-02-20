@@ -74,18 +74,44 @@ def process(line: str, record_num: int):
     return ' '.join(arr)
 
 
-def gen(file_name: str, record_num: int):
+def process_model3(line: str, record_num: int):
+    tag_arr = tag_com.findall(line)
+    newline = tag_com.sub(r'#$%MYLABLE#$%', line)
+    arr = list(filter(None, newline.split('#$%')))
+    lenth = len(arr)
+    lable_idx = 1
+    record_lable = {}
+    record_lable['$lable'] = []
+    for i in range(lenth):
+        if arr[i] == 'MYLABLE':
+            if lable_idx <= record_num:
+                arr[i] = '$lable_' + str(lable_idx)
+                recorf_lable[arr[i]] = tag_arr[lable_idx - 1]
+            else:
+                arr[i] = '$lable'
+                recorf_lable[arr[i]].append(tag_arr[lable_idx - 1])
+            lable_idx = lable_idx + 1
+    global gen_file
+    gen_file.write(json.dumps(record_lable) + '\n')
+    return ' '.join(arr)
+
+
+def gen(file_name: str, record_num: int, model: int):
     with open(file_name, 'r', encoding='utf-8') as f:
         for l in f.readlines():
-            print(process(l.rstrip('\n'), record_num))
+            if model == '2':
+                print(process(l.rstrip('\n'), record_num))
+            else:
+                print(process3(l.rstrip('\n'), record_num))
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         exit(
-            'ERROR! generalize_file needs 2 parms\n such as "python generalize_file.py file_name record_num " '
+            'ERROR! generalize_file needs 3 parms\n such as "python generalize_file.py file_name record_num model" '
         )
     gen_file = open('gen_record', 'w', encoding='utf-8')
     file_name = sys.argv[1]
     record_num = int(sys.argv[2])
-    gen(file_name, record_num)
+    model = int(sys.argv[3])
+    gen(file_name, record_num, model)

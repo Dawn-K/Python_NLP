@@ -10,7 +10,7 @@
 function parm_err(){
 	echo "Please input -l -m -k -moses -subword parms\n such as ./myprepare.sh -l no -m 0 -k 6 -e ~/moses/mosesdecoder/scripts -s ~/subword-nmt/subword_nmt"
 	echo "-l <protection>     <protection> can be 'no' 'tok' 'bpe' "
-	echo "-m <model>          <model> can be 0 or 1 or 2  "
+	echo "-m <model>          <model> can be 0 or 1 or 2 or 3 "
     echo "-k <record_num>     <record_num> is the num of lable to record"
     echo "-e <path>           <path> is the path of moses scripts  "
     echo "-s <path>           <path> is the path of subword      "
@@ -49,7 +49,7 @@ if  [ "$LABLE" != "no" ] && [ "$LABLE" != "tok" ] && [ "$LABLE" != "bpe" ]; then
 	parm_err
 fi
 
-if  [ "$MODEL" != "0" ] && [ "$MODEL" != "1" ] && [ "$MODEL" != "2" ]; then  
+if  [ "$MODEL" != "0" ] && [ "$MODEL" != "1" ] && [ "$MODEL" != "2" ] && [ "$MODEL" != "3" ]; then  
 	parm_err
 fi
 
@@ -84,11 +84,11 @@ done
 
 python3 restore_token.py $LABLE $MODEL $CREATDATA/$cslxprefix.$src > $CREATDATA/$cslxprefix.restore.$src
 
-if [ "$MODEL" != "2" ];
+if [ "$MODEL" != "2" ] && [ "$MODEL" != "3" ];
 then
     python3 lable_process.py $MODEL $CREATDATA/$cslxprefix.restore.$src > $orig/$cslxprefix.$src
 else
-    python3 generalize_file.py $CREATDATA/$cslxprefix.restore.$src  $RECORD_NUM > $orig/$cslxprefix.$src
+    python3 generalize_file.py $CREATDATA/$cslxprefix.restore.$src  $RECORD_NUM $MODEL > $orig/$cslxprefix.$src
 fi
 
 # 进行分词和清理
@@ -178,6 +178,6 @@ DATADIR=../preprocess_data
 rm -rf $DATADIR
 mkdir -p $DATADIR
 fairseq-preprocess --source-lang $src --target-lang $tgt \
-    --trainpref $TEXT/train --validpref $TEXT/valid  \
+    --trainpref $TEXT/train --validpref $TEXT/valid --testpref $TEXT/test  \
     --destdir $DATADIR \
     --workers 20

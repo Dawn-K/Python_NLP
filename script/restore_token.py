@@ -17,7 +17,7 @@ def trans(lable_type: str, model_type: str, file_name: str):
     remove_sig = [' ']
     if lable_type == "bpe":
         remove_sig.append('@')
-    if model_type != "2":
+    if model_type != "2" and model_type != "3":
         left_tag = None
         right_tag = None
         left_tag_to = None
