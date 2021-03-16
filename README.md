@@ -4,7 +4,6 @@
 
 本仓库记录寒假在小牛翻译实验室编写的一些程序
 
-
 ## creat_data
 
 构造带标签的双语语料
@@ -20,28 +19,32 @@
 
 ### 使用方法
 
-首先编辑 `main.sh` ,配置好文件
+首先编辑 `main.sh` , 配置好文件
 
-```bash
+``` bash
 chmod +x main.sh
 ./main.sh  -l <protection> -m <model>
 ```
-`<protection> 只能是 'no' 'tok' 'bpe'中的一种 `
-`<model> 只能是 0 或 1 或 2`
-```
+
+ `<protection> 只能是 'no' 'tok' 'bpe'中的一种 `
+
+ `<model> 只能是 0 或 1 或 2`
+
+``` 
+
 0 : 不泛化
 1 : 标签两端加$copy
 2 : 完全泛化
 ```
 
 举例
-```
+
+``` 
+
 ./main.sh -l bpe -m 1 
 ```
-**2/13/2020 :**
 
-制造出的带标签数据存在`orig/`里面
+##  报告
 
-`process_data/`存放 fairseq-preprocess 生成的文件
-
-`test.sh`可以调用`main.sh`生成所有九种数据
+[proposal](https://github.com/Dawn-K/Python_NLP/blob/master/doc/proposal-孔振华.pdf)
+[poster](https://github.com/Dawn-K/Python_NLP/blob/master/doc/东北大学自然语言处理实验室实习报告-孔振华.pdf)
