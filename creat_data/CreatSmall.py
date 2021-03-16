@@ -4,7 +4,7 @@ r""" Read the first few lines of the wmt2018 and write to data/raw_small  """
 import re, os
 
 
-def wmt2018_to_rawsmall(file_name:str,cnt: int):
+def wmt2018_to_rawsmall(file_name: str, cnt: int):
     data_path = os.getcwd() + '/data'
     if not os.path.exists(data_path):
         os.makedirs(data_path)

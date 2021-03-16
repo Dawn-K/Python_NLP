@@ -72,23 +72,27 @@ orig=../orig
 # rawdata 和 testdata也依赖上层参数
 CREATDATA=../creat_data/data
 rawprefix=out_test
-testprefix=out_test
-cslxprefix=test_splitce
+testprefix=test_splitce
+# cslxprefix=test_splitce
 mkdir -p $orig $tmp $prep
 
 # 最开始假设所需的资料都和脚本同目录,并且名字为$rawprefix.* $testprefix.*
 for l in $src $tgt; do
     python3 lable_process.py $MODEL $CREATDATA/$rawprefix.$l  $l > $orig/$rawprefix.$l
-    python3 lable_process.py $MODEL $CREATDATA/$testprefix.$l $l > $orig/$testprefix.$l
+    # python3 lable_process.py $MODEL $CREATDATA/$testprefix.$l $l > $orig/$testprefix.$l
 done
 
-python3 restore_token.py $LABLE $MODEL $CREATDATA/$cslxprefix.$src > $CREATDATA/$cslxprefix.restore.$src
+for l in $src $tgt; do
+    python3 restore_token.py $LABLE $MODEL $CREATDATA/$testprefix.$l > $CREATDATA/$testprefix.restore.$l
+done
 
 if [ "$MODEL" != "2" ] && [ "$MODEL" != "3" ];
 then
-    python3 lable_process.py $MODEL $CREATDATA/$cslxprefix.restore.$src > $orig/$cslxprefix.$src
+    python3 lable_process.py $MODEL $CREATDATA/$cslxprefix.restore.$src > $orig/$testprefix.$src
+    python3 lable_process.py $MODEL $CREATDATA/$cslxprefix.restore.$tgt > $orig/$testprefix.$tgt
 else
-    python3 generalize_file.py $CREATDATA/$cslxprefix.restore.$src  $RECORD_NUM $MODEL > $orig/$cslxprefix.$src
+    python3 generalize_file.py $CREATDATA/$testprefix.restore.$src  $RECORD_NUM $MODEL > $orig/$testprefix.$src
+    cp $CREATDATA/$testprefix.restore.$tgt $orig/$testprefix.$tgt
 fi
 
 # 进行分词和清理

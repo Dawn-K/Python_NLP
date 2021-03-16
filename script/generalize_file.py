@@ -86,10 +86,10 @@ def process_model3(line: str, record_num: int):
         if arr[i] == 'MYLABLE':
             if lable_idx <= record_num:
                 arr[i] = '$lable_' + str(lable_idx)
-                recorf_lable[arr[i]] = tag_arr[lable_idx - 1]
+                record_lable[arr[i]] = tag_arr[lable_idx - 1]
             else:
                 arr[i] = '$lable'
-                recorf_lable[arr[i]].append(tag_arr[lable_idx - 1])
+                record_lable[arr[i]].append(tag_arr[lable_idx - 1])
             lable_idx = lable_idx + 1
     global gen_file
     gen_file.write(json.dumps(record_lable) + '\n')
@@ -102,7 +102,7 @@ def gen(file_name: str, record_num: int, model: int):
             if model == '2':
                 print(process(l.rstrip('\n'), record_num))
             else:
-                print(process3(l.rstrip('\n'), record_num))
+                print(process_model3(l.rstrip('\n'), record_num))
 
 
 if __name__ == '__main__':

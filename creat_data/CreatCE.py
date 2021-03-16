@@ -5,8 +5,8 @@ import numpy as np
 
 
 def creat_cn_en():
-    cn = open('data/cn', 'w', encoding='utf-8')
-    en = open('data/en', 'w', encoding='utf-8')
+    cn = open('data/cn.haserr', 'w', encoding='utf-8')
+    en = open('data/en.haserr', 'w', encoding='utf-8')
     c_pattern = r'\u4e00-\u9fa5\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b'
     pattern = r'([\s\S]+?)([^' + c_pattern + r']+)$'
     process_com = re.compile(pattern)
