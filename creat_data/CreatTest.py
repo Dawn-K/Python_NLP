@@ -12,5 +12,7 @@ def splitce(test_file: str):
                 for l in f.readlines():
                     arr = l.rstrip('\n').split('\t')
                     if len(c_pattern_com.findall(arr[1])) == 0:
+                        if len(arr[1]) > 1000:
+                            continue
                         w_cn.write(arr[0] + '\n')
                         w_en.write(arr[1] + '\n')

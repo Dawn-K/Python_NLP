@@ -16,6 +16,7 @@ company_tags = []
 comment_sign = '!--...--'
 only_company = False
 
+
 def updateDict(arr: list):
     for w in arr:
         if len(remove_com.findall(w)) != 0:
@@ -72,6 +73,7 @@ def print_res():
                 print('%.2f%%   ' % (item[1] / sum_com_tags * 100), end=' ')
             print('%.2f%%' % (item[1] / sum * 100))
 
+
 def print_diff():
     print('only in dict   ----->')
     for w in dict.keys():
@@ -81,7 +83,8 @@ def print_diff():
     for w in company_tags:
         if w not in dict.keys():
             print(w)
-    
+
+
 if __name__ == '__main__':
     dict[comment_sign] = 0
     for files in os.listdir('./htmlsrc'):

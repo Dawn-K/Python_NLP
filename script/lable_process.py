@@ -18,7 +18,7 @@ def generalized(file_name: str, language: str):
     #todo: path
     with open(file_name + language, 'r', encoding='utf-8') as f:
         for l in f.readlines():
-            print(l)
+            print(l, end='')
 
 
 def pro_line(line: str, model: int, language: str):

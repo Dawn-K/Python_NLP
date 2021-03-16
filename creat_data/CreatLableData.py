@@ -164,7 +164,10 @@ class ControlCore:
         arr2 = list(filter(None, s2.getTokenStr().split(' ')))
         for i in range(len(arr1)):
             if re.match(r'^\$lable_', arr1[i]) is not None:
-                trans_dict[arr1[i]] = r'$lable_' + str(idx)
+                if idx <= record_num:
+                    trans_dict[arr1[i]] = r'$lable_' + str(idx)
+                else:
+                    trans_dict[arr1[i]] = r'$lable'
                 arr1[i] = trans_dict[arr1[i]]
                 idx = idx + 1
         for i in range(len(arr2)):
@@ -195,15 +198,17 @@ class ControlCore:
 
             # 生成L3标签
             # todo: L3生成的概率
-            l3_probability = random.randint(0, 49)
-            while l3_probability == 1:
-                l3_cn_pos = random.randint(0, word_cn.len - 1)
-                if l3_cn_pos in align.keys():
-                    l3_en_pos = align[l3_cn_pos][0]
-                    ins_record.append(
-                        Insert_Record(l3_cn_pos, l3_cn_pos, l3_en_pos,
-                                      l3_en_pos, L3_LABLE))
-                    break
+            insert_num = insert_num // 2
+            for loop in range(insert_num):
+                l3_probability = 1
+                while l3_probability == 1:
+                    l3_cn_pos = random.randint(0, word_cn.len - 1)
+                    if l3_cn_pos in align.keys():
+                        l3_en_pos = align[l3_cn_pos][0]
+                        ins_record.append(
+                            Insert_Record(l3_cn_pos, l3_cn_pos, l3_en_pos,
+                                          l3_en_pos, L3_LABLE))
+                        break
 
             for loop in range(insert_num):
                 # 生成 中文插入的范围 p1 p2 都是闭区间
@@ -252,6 +257,7 @@ class ControlCore:
                 word_cn.add(elem.cn_l_pos, elem.cn_r_pos, elem.lable)
                 word_en.add(elem.en_l_pos, elem.en_r_pos, elem.lable)
                 # 生成泛化标签
+                #print('err! lable_idx ',lable_idx,' record_num ',record_num)
                 gen_lable = self.creat_gen2lable(elem, lable_idx <= record_num,
                                                  lable_idx)
                 word_gen_cn.add(elem.cn_l_pos, elem.cn_r_pos, gen_lable)
@@ -301,7 +307,3 @@ def CreatLableData(record_num: int):
     out_generalization_en.close()
     out_generalization3_cn.close()
     out_generalization3_en.close()
-
-
-if __name__ == '__main__':
-    CreatLableData(6)

@@ -4,13 +4,12 @@ import CreatAlign as CA
 import CreatLableData as CLD
 import CreatTest as CT
 import sys
-import remove as RM
+
 
 def MainCreat(file_name: str, line_num: int, test_file: str, record_num: int,
               moses_path: str, fast_align_path: str):
-    # CS.wmt2018_to_rawsmall(file_name, line_num)
-    # CCE.creat_cn_en()
-    # RM.remove_unuseline()
+    CS.wmt2018_to_rawsmall(file_name, line_num)
+    CCE.creat_cn_en()
     CA.main_creat(moses_path, fast_align_path)
     CLD.CreatLableData(record_num)
     CT.splitce(test_file)

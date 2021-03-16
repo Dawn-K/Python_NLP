@@ -12,15 +12,21 @@ def process_model2(line: str, info: str):
     for i in range(lenth):
         if arr[i] in dict.keys():
             if arr[i] == '$lable':
-                arr[i] = dict['$lable'][0]
-                del dict['$lable'][0]
+                if len(dict['$lable']) > 0:
+                    arr[i] = dict['$lable'][0]
+                    del dict['$lable'][0]
+                else:
+                    arr[i] = ''
             else:
                 arr[i] = dict[arr[i]]
+        else:
+            if re.match('\$lable_', arr[i]) is not None:
+                arr[i] = ''
     return ' '.join(arr)
 
 
 def anti_generalize(input_file: str, json_file: str, model: str):
-    if model == "2":
+    if model == "2" or model == "3":
         with open(input_file, 'r', encoding='utf-8') as i:
             with open(json_file, 'r', encoding='utf-8') as j:
                 for raw, js in zip(i.readlines(), j.readlines()):

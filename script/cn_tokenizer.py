@@ -2,15 +2,15 @@ r"""中文分词,方便预处理脚本调用
 """
 
 import pynlpir, os, sys
+import jieba
 
 
 def process(file_name: str):
-    pynlpir.open()
     with open(file_name, 'r', encoding='utf-8') as file:  #  read cn
         for word in file:
-            final_str = ' '.join(pynlpir.segment(word, pos_tagging=False))
+            word = word.rstrip('\n')
+            final_str = ' '.join(jieba.cut(word))
             print(final_str)
-    pynlpir.close()
 
 
 if __name__ == '__main__':

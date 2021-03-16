@@ -3,21 +3,25 @@ r""" creat cn_token , c2e , en_token
 """
 import re, sys, os
 import pynlpir
+import jieba
 
 
 def creat_cn_token():
     tmp_file_c = open('data/cn_token', 'w', encoding='utf-8')  # creat cn_token
     with open('data/cn', 'r', encoding='utf-8') as file:  #  read cn
         for word in file:
-            final_str = ' '.join(pynlpir.segment(word, pos_tagging=False))
-            tmp_file_c.write(final_str + '\n')
+            final_str = ' '.join(jieba.cut(word))
+            #print('final str:',final_str)
+            #final_str1 = ' '.join(pynlpir.segment(word,pos_tagging=False))
+            #print(final_str == final_str1)
+            tmp_file_c.write(final_str)
     pynlpir.close()
     tmp_file_c.close()
 
 
 # ~/moses/mosesdecoder/scripts
 def creat_en_token(moses_path: str):
-    en_token_cmd = r'perl ' + moses_path + r'/tokenizer/tokenizer.perl -l en < data/en  > data/en_token'
+    en_token_cmd = r'perl ' + moses_path + r'/tokenizer/tokenizer.perl  -threads 8 -l en < data/en  > data/en_token'
     os.system(en_token_cmd)
     en_true_token_cmd1 = r'perl ' + moses_path + r'/recaser/train-truecaser.perl --model data/truecase_model.en --corpus data/en_token'
     en_true_token_cmd2 = r'perl ' + moses_path + r'/recaser/truecase.perl        --model data/truecase_model.en < data/en_token > data/en_true_token'

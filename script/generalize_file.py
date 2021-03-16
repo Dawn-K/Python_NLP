@@ -99,7 +99,7 @@ def process_model3(line: str, record_num: int):
 def gen(file_name: str, record_num: int, model: int):
     with open(file_name, 'r', encoding='utf-8') as f:
         for l in f.readlines():
-            if model == '2':
+            if model == 2:
                 print(process(l.rstrip('\n'), record_num))
             else:
                 print(process_model3(l.rstrip('\n'), record_num))

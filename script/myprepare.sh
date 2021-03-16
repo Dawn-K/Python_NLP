@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
-#
-# Adapted from https://github.com/facebookresearch/MIXER/blob/master/prepareData.sh
 
-# Training Set     用来训练模型
-# Validation Set   用来做model selection
-# Test set         用来评估所选出来的model的实际性能
+#对数据进行预处理
 
 
 function parm_err(){
-	echo "Please input -l -m -k -moses -subword parms\n such as ./myprepare.sh -l no -m 0 -k 6 -e ~/moses/mosesdecoder/scripts -s ~/subword-nmt/subword_nmt"
+	echo "Please input -l -m -k -moses -subword  -c parms\n such as ./myprepare.sh -l no -m 0 -k 6 -e ~/moses/mosesdecoder/scripts -s ~/subword-nmt/subword_nmt -c 0"
 	echo "-l <protection>     <protection> can be 'no' 'tok' 'bpe' "
 	echo "-m <model>          <model> can be 0 or 1 or 2 or 3 "
     echo "-k <record_num>     <record_num> is the num of lable to record"
     echo "-e <path>           <path> is the path of moses scripts  "
     echo "-s <path>           <path> is the path of subword      "
+	echo "-c <GPU_NUM>    <GPU_NUM> is the path of GPU    "
 	exit
 	exit
 }
@@ -26,7 +23,8 @@ MOSESROOT=""
 BPEROOT=""
 RECORD_NUM=""
 BPE_TOKENS=10000
-while getopts 'l:m:k:e:s:' opt
+GPU_NUM=0
+while getopts 'l:m:k:e:s:c:' opt
 do
 	case $opt in
 		l)
@@ -39,7 +37,9 @@ do
             MOSESROOT=$OPTARG;;
         s)
             BPEROOT=$OPTARG;;
-		*)
+	c)
+	    GPU_NUM=$OPTARG;;
+	*)
 			parm_err
 	esac
 done
@@ -53,9 +53,7 @@ if  [ "$MODEL" != "0" ] && [ "$MODEL" != "1" ] && [ "$MODEL" != "2" ] && [ "$MOD
 	parm_err
 fi
 
-# script path
-# 以.sh为中心,
-# SCRIPTS 可设计成依赖上层参数,感觉设计成绝对路径比较好
+
 SCRIPTS=$MOSESROOT
 TOKENIZER=$SCRIPTS/tokenizer/tokenizer.perl
 LC=$SCRIPTS/tokenizer/lowercase.perl
@@ -75,24 +73,22 @@ rawprefix=out_test
 testprefix=test_splitce
 # cslxprefix=test_splitce
 mkdir -p $orig $tmp $prep
-
 # 最开始假设所需的资料都和脚本同目录,并且名字为$rawprefix.* $testprefix.*
 for l in $src $tgt; do
     python3 lable_process.py $MODEL $CREATDATA/$rawprefix.$l  $l > $orig/$rawprefix.$l
-    # python3 lable_process.py $MODEL $CREATDATA/$testprefix.$l $l > $orig/$testprefix.$l
 done
 
-for l in $src $tgt; do
-    python3 restore_token.py $LABLE $MODEL $CREATDATA/$testprefix.$l > $CREATDATA/$testprefix.restore.$l
-done
+#for l in $src $tgt; do
+    #python3 restore_token.py $LABLE 0 $CREATDATA/${testprefix}.$l > $CREATDATA/${testprefix}.restore.$l
+#done
 
 if [ "$MODEL" != "2" ] && [ "$MODEL" != "3" ];
 then
-    python3 lable_process.py $MODEL $CREATDATA/$cslxprefix.restore.$src > $orig/$testprefix.$src
-    python3 lable_process.py $MODEL $CREATDATA/$cslxprefix.restore.$tgt > $orig/$testprefix.$tgt
+    python3 lable_process.py $MODEL $CREATDATA/${testprefix}.$src $src > $orig/${testprefix}.$src
+    python3 lable_process.py $MODEL $CREATDATA/${testprefix}.$tgt $tgt > $orig/${testprefix}.$tgt
 else
-    python3 generalize_file.py $CREATDATA/$testprefix.restore.$src  $RECORD_NUM $MODEL > $orig/$testprefix.$src
-    cp $CREATDATA/$testprefix.restore.$tgt $orig/$testprefix.$tgt
+    python3 generalize_file.py $CREATDATA/${testprefix}.$src  $RECORD_NUM $MODEL > $orig/${testprefix}.$src
+    mv $CREATDATA/${testprefix}.$tgt $orig/${testprefix}.$tgt
 fi
 
 # 进行分词和清理
@@ -104,7 +100,7 @@ for l in $src $tgt; do
 	  python3 $CN_TOKENIZER $orig/$rawprefix.$l | perl $TOKENIZER -l cn > $tmp/$tok
 	  echo "cn tokenizer finished"
     else
-      perl $TOKENIZER -l en < $orig/$rawprefix.$l  >  $tmp/$tok 
+      perl $TOKENIZER  -threads 8 -l en < $orig/$rawprefix.$l  >  $tmp/$tok 
 	  echo "en tokenizer finished"
     fi
 done
@@ -113,8 +109,8 @@ done
 # perl $CLEAN -ratio 1.5 $tmp/train.tok $src $tgt $tmp/train.clean 1 175
 
 # 跳过CLEAN
-cp $tmp/train.tok.$src $tmp/train.clean.$src
-cp $tmp/train.tok.$tgt $tmp/train.clean.$tgt
+mv $tmp/train.tok.$src $tmp/train.clean.$src
+mv $tmp/train.tok.$tgt $tmp/train.clean.$tgt
 
 for l in $src $tgt; do
     perl $LC < $tmp/train.clean.$l > $tmp/train.tags.$l
@@ -122,20 +118,26 @@ done
 echo "finished tokenize , clean , lowercase"
 
 echo "creating train, valid, test..."
-perl $TOKENIZER -l en < $orig/$testprefix.en | perl $LC > $tmp/test.en
-python3 $CN_TOKENIZER $orig/$testprefix.cn  | perl $TOKENIZER -l cn | perl $LC > $tmp/test.cn 
+perl $TOKENIZER  -threads 8 -l en < $orig/$testprefix.en | perl $LC > $tmp/test.en
+python3 $CN_TOKENIZER $orig/$testprefix.cn  | perl $TOKENIZER  -threads 8 -l cn | perl $LC > $tmp/test.cn 
 
 # 在分词时不切分
 if [ "$LABLE" != "no" ]; then
     for l in $src $tgt; do
-        cp $tmp/test.$l $tmp/test.bak.$l
-        cp $tmp/train.tags.$l $tmp/train.tags.bak.$l
+        mv $tmp/test.$l $tmp/test.bak.$l
+        mv $tmp/train.tags.$l $tmp/train.tags.bak.$l
     done
 
     for l in $src $tgt; do
-        python3 restore_token.py $LABLE $MODEL $tmp/test.bak.$l > $tmp/test.$l
         python3 restore_token.py $LABLE $MODEL $tmp/train.tags.bak.$l > $tmp/train.tags.$l
     done
+    
+    python3 restore_token.py $LABLE $MODEL $tmp/test.bak.$src > $tmp/test.$src
+    if [ "$MODEL" == "0" ] || [ "$MODEL" == "1" ]; then
+        python3 restore_token.py $LABLE $MODEL $tmp/test.bak.$tgt > $tmp/test.$tgt
+    else
+        python3 restore_token.py $LABLE 0 $tmp/test.bak.$tgt > $tmp/test.$tgt
+    fi
 fi
 
 # 每23条抽一条放到valid.*,剩下的放到train.*
@@ -166,22 +168,37 @@ done
 if [ "$LABLE" == "bpe" ]; then # 仅BPE时保留
     for l in $src $tgt; do
         for f in train.$l valid.$l test.$l; do
-            cp $prep/$f $prep/$f.bpebak
+            mv $prep/$f $prep/${f}.bpebak
         done
     done
 
     for l in $src $tgt; do
-        for f in train.$l valid.$l test.$l; do
-            python3 restore_token.py $LABLE $MODEL $prep/$f.bpebak > $prep/$f
+        for f in train.$l valid.$l; do
+            python3 restore_token.py $LABLE $MODEL $prep/${f}.bpebak > $prep/$f
         done
     done
+
+    python3 restore_token.py $LABLE $MODEL $prep/test.${src}.bpebak > $prep/test.$src
+    if [ "$MODEL" != "3" ] && [ "$MODEL" != "2" ]; then
+        python3 restore_token.py $LABLE $MODEL $prep/test.${tgt}.bpebak > $prep/test.$tgt
+    else
+        python3 restore_token.py $LABLE 0 $prep/test.${tgt}.bpebak > $prep/test.$tgt
+    fi
 fi
 
+
+DATA_DIR=../orig
+python3 remove_test.py $DATA_DIR/test_splitce.$src $DATA_DIR/test_splitce.$tgt $prep/test.$src $prep/test.$tgt gen_record $MODEL
+cp new_RC $orig/
+cp new_RE $orig/
+cp new_C $prep/test.$src
+cp new_E $prep/test.$tgt
+cp new_R gen_record
 TEXT=$prep
 DATADIR=../preprocess_data
 rm -rf $DATADIR
 mkdir -p $DATADIR
-fairseq-preprocess --source-lang $src --target-lang $tgt \
+   fairseq-preprocess --source-lang $src --target-lang $tgt \
     --trainpref $TEXT/train --validpref $TEXT/valid --testpref $TEXT/test  \
     --destdir $DATADIR \
     --workers 20

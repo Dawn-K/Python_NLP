@@ -1,3 +1,4 @@
+# 构造数据
 
 function parm_err(){
 	echo "Please input -f -l -t -k -e and -a parms\n such as ./mycreatdata.sh -f wmt2018.zh2en-Registry -l 100 -t cslx-dataset-zh2en -k 6 -e ~/moses/mosesdecoder/scripts -a ~/fast_align/fast_align-master/build"

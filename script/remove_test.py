@@ -5,7 +5,7 @@ if __name__ == '__main__':
             'err! python3 remove_test.py RAWTEST.cn RAWTEST.en TEST.cn TEST.en RECORD MODEL'
         )
     RAWCN = sys.argv[1]
-    RAWEN.sysargv[2]
+    RAWEN = sys.argv[2]
     CN = sys.argv[3]
     EN = sys.argv[4]
     RECORD = sys.argv[5]
@@ -21,8 +21,6 @@ if __name__ == '__main__':
                 with open(CN, 'r', encoding='utf-8') as C:
                     with open(EN, 'r', encoding='utf-8') as E:
                         with open(RECORD, 'r', encoding='utf-8') as R:
-                            print(RC.readlines(), RE.readlines(),
-                                  C.readlines(), E.readlines(), R.readlines())
                             for rc, re, c, e, r in zip(RC.readlines(),
                                                        RE.readlines(),
                                                        C.readlines(),

@@ -50,9 +50,9 @@ def trans(lable_type: str, model_type: str, file_name: str):
                     if not flag or normal_line[i] not in remove_sig:
                         final_arr.append(normal_line[i])
                 print(''.join(final_arr), end='')
-    else:  #  $ lable _ l1  or  $ lable   or  $ lable _ l
+    else:  #  $ lable _ l1  or  $ lable   or $ lable _ l
         gen_tag = r'\$ lable'
-        gen_tag_line = r'\$lable _ '
+        gen_tag_line = r'\$lable[ ]?_[@ ]*'
         gen_tag_com = re.compile(gen_tag)
         gen_tag_line_com = re.compile(gen_tag_line)
         with open(file_name, 'r', encoding='utf-8') as f:
@@ -65,9 +65,9 @@ def trans(lable_type: str, model_type: str, file_name: str):
 if __name__ == '__main__':
     if len(sys.argv) != 4:
         exit(
-            'ERROR! lable_process needs 1 parm\n such as "python restore_token.py lable_type model_type file  "\n'
+            'ERROR! restore_token needs 1 parm\n such as "python restore_token.py lable_type model_type file  "\n'
             + 'lable type must be "no" or "tok" or "bpe" '  # 保留类型
-            + 'model type must be 0 or 1 or 2'  # 泛化类型
+            + 'model type must be 0 or 1 or 2 or 3'  # 泛化类型
         )
     lable_type = sys.argv[1]
     model_type = sys.argv[2]

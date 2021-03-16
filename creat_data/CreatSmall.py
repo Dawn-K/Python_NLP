@@ -19,7 +19,3 @@ def wmt2018_to_rawsmall(file_name: str, cnt: int):
             new_word = remove_tail_com.sub('', word)
             small.writelines(new_word + '\n')
     small.close()
-
-
-if __name__ == '__main__':
-    wmt2018_to_rawsmall(100)
